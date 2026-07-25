@@ -1,0 +1,25 @@
+name: Deploy patch to VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      patch:
+        description: 'Patch file in repo to run (e.g. patch6.php)'
+        required: true
+        default: 'patch6.php'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run patch on VPS over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            cd /var/www/lumiere/experience
+            curl -fsSL "https://raw.githubusercontent.com/raktky/lumiere-deploy/main/${{ github.event.inputs.patch }}" -o /root/run_patch.php
+            php /root/run_patch.php

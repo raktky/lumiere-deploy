@@ -50,7 +50,12 @@ $pc=str_replace(
   '<p class="sub">This link is invalid or has expired. Please contact us for a fresh quote.</p>',
   '<p class="sub"><?= (isset($__expired) && $__expired) ? \'This quote link has expired or been withdrawn. Please contact us for an updated quote.\' : \'This link is invalid or has expired. Please contact us for a fresh quote.\' ?></p>',
   $pc,$n4); $rep[]='q_text='.$n4;
-if($pc!==$pc0){ put_lint($pf,$pc,$rep,'qphp'); } else { $rep[]='qphp=nochange'; }
+if($pc!==$pc0){
+  if(!put_lint($pf,$pc,$rep,'qphp')){
+    $t=tempnam(sys_get_temp_dir(),'q');file_put_contents($t,$pc);exec('php -l '.escapeshellarg($t).' 2>&1',$eo,$erc);unlink($t);
+    file_put_contents("$root/_qerr.txt", base64_encode(implode("\n",$eo)));
+  }
+} else { $rep[]='qphp=nochange'; }
 
 /* 3. admin/quote.php link-controls box */
 $qf="$root/admin/quote.php"; $qc=file_get_contents($qf); $qc0=$qc;
@@ -114,6 +119,6 @@ PHPX;
 }
 
 $cc=0;foreach(glob("$root/cache/*.html") as $g){@unlink($g);$cc++;}
-foreach(glob("$root/_*.txt") as $g){@unlink($g);}
+foreach(glob("$root/_*.txt") as $g){ if(basename($g)==='_qerr.txt') continue; @unlink($g);}
 file_put_contents("$root/_pc2.txt", implode(" ",$rep)." cache=$cc");
 echo implode("\n",$rep)."\ncache=$cc\nDONE\n";

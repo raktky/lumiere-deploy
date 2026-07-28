@@ -1,0 +1,1 @@
+<?php $root='/var/www/lumiere/experience'; $d=0; foreach(['_aiblob.txt','_pfin3.txt','_pfin2.txt','_run.php'] as $f){ if(@unlink("$root/$f"))$d++; } foreach(glob("$root/_p*.txt") as $g){@unlink($g);$d++;} echo "CLEANED $d\n";
